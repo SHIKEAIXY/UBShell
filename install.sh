@@ -40,6 +40,15 @@ echo "输入错误，请输入yes或no:"
 fi
 done
 
+# 检查ffmpeg是否已经安装
+if command -v ffmpeg >/dev/null 2>&1; then
+echo "ffmpeg已经安装，跳过安装步骤"
+else
+echo "ffmpeg未安装，开始进行安装"
+sudo apt install -y ffmpeg
+echo "ffmpeg安装完成"
+fi
+
 # 检查nodejs是否已经安装
 if [ -z "$(command -v node)" ]; then
 echo "nodejs未安装，开始安装..."
