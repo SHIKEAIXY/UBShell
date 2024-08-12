@@ -189,11 +189,11 @@ fi
 
 # 判断redis是否启动
 if pgrep "redis-server" >/dev/null; then
-echo "已启动，跳过"
+echo -e "${Huang}已启动，跳过${RESET_COLOR}"
 else
-echo "正在启动redis数据库."
+echo -e "${Hong}正在启动redis数据库.${RESET_COLOR}"
 sudo systemctl start redis-server
 fi
 
-echo "等待3秒继续..."
-sleep 3
+sleep 1
+echo -e "${Lan}安装完毕${RESET_COLOR}"
