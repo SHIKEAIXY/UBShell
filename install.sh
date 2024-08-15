@@ -146,29 +146,15 @@ echo -e "${Lan}设置成功${RESET_COLOR}"
 fi
 
 if dpkg -l | grep -q "^ii  fonts-wqy-microhei"; then
-echo -e "${Huang}fonts-wqy-microhei已安装，跳过安装步骤${RESET_COLOR}"
-echo -e "${Lan}中文字体安装完毕${RESET_COLOR}"
+echo -e "${Huang}fonts-wqy-microhei 已安装，跳过安装步骤${RESET_COLOR}"
 else
-echo -e "${Hong}正在安装中文字体-文泉驿微米黑中${RESET_COLOR}"
-sudo apt install -y fonts-wqy-microhei
-echo -e "${Lan}fonts-wqy-microhei安装完成${RESET_COLOR}"
-fi
-
-echo -e "${Zi}请选择是否重置字体缓存，初次安装请yes(yes或no)${RESET_COLOR}"
-
-while true; do
-read user_input
-if [ "$user_input" == "yes" ] || [ "$user_input" == "y" ]; then
+echo -e "${Hong}正在安装中文字体 - 文泉驿微米黑中${RESET_COLOR}"
+sudo apt update && sudo apt install -y fonts-wqy-microhei
+echo -e "${Lan}fonts-wqy-microhei 安装完成${RESET_COLOR}"
 echo -e "${Hong}正在重置字体缓存中${RESET_COLOR}"
 sudo fc-cache -f -v
 echo -e "${Lan}中文字体设置完毕${RESET_COLOR}"
-break
-elif [ "$user_input" == "no" ] || [ "$user_input" == "n" ]; then
-break
-else
-echo -e "${Hong}输入错误，请输入yes或no:${RESET_COLOR}"
 fi
-done
 
 # 安装screen
 which screen > /dev/null
