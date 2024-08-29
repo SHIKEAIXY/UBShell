@@ -1,4 +1,10 @@
+# 适用于Ubuntu的基础包快捷安装
+
+## 使用
 
 ```
-bash <(curl -L https://gitee.com/SHIKEAIXY/le/raw/master/install.sh)
+sudo su -
+```
+```
+bash <(curl -L https://gitee.com/SHIKEAIXY/UBShell/raw/master/install.sh)
 ```
