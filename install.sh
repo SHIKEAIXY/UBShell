@@ -128,6 +128,16 @@ else
 echo -e "${Huang}pnpm已安装，跳过安装步骤${RESET_COLOR}"
 fi
 
+# 检查net-tools是否已安装
+if ! type netstat >/dev/null 2>&1; then
+echo -e "${Hong}net-tools未安装"
+echo -e "${Hong}正在安装net-tools中${RESET_COLOR}"
+apt install net-tools -y
+echo -e "${Lan}net-tools安装完成${RESET_COLOR}"
+else
+echo -e "${Huang}net-tools已安装，跳过安装步骤${RESET_COLOR}"
+fi
+
 # 检查redis-server是否已安装
 if dpkg -l | grep -q "^ii  redis-server"; then
 echo -e "${Huang}redis-server已安装，跳过安装步骤${RESET_COLOR}"
