@@ -37,26 +37,36 @@ echo -e "${Hong}⚠️⚠️⚠️：当前非 Ubuntu，请更换Ubuntu发行版
 exit 0
 fi
 
-echo -e "${Zi}请选择是否更新apt列表和安装必要依赖包"
-echo -e "初次安装使用请yes (yes或no)${RESET_COLOR}"
-
-while true; do
-read user_input
-if [ "$user_input" == "yes" ] || [ "$user_input" == "y" ]; then
-echo -e "${Lu}正在更新apt列表和升级已安装的软件包${RESET_COLOR}"
-sudo apt update -y
-sudo apt upgrade -y
-# 安装必要的包，不可跳过
-echo -e "${Lu}正在安装必要依赖包中...${RESET_COLOR}"
-sudo apt install -y apt-transport-https curl ca-certificates software-properties-common
-echo -e "${Lan}更新成功${RESET_COLOR}"
-break
-elif [ "$user_input" == "no" ] || [ "$user_input" == "n" ]; then
-break
+# 判断列表是否为最新
+echo -e "${Hong}正在检查apt列表...${RESET_COLOR}"
+if ! sudo apt list --upgradable -a 2>/dev/null | grep -q "Listing..."; then
+echo -e "${Hong}正在更新apt列表..."
+echo -e "${Hong}接下来安装时间较长且无输出请耐心等待...${RESET_COLOR}"
+sudo apt update -y 2>/dev/null
 else
-echo -e "${Hong}输入错误，请输入yes或no:${RESET_COLOR}"
+echo -e "${Lan}apt列表已是最新，跳过${RESET_COLOR}"
+fi
+
+echo -e "${Hong}正在安装部分依赖包...${RESET_COLOR}"
+packages=(apt-transport-https curl ca-certificates software-properties-common)
+for package in "${packages[@]}"; do
+if dpkg -s "$package" >/dev/null 2>&1; then
+echo -e "${Lan}${package} 已安装，跳过${RESET_COLOR}"
+else
+echo -e "${Hong}${package} 未安装，正在安装...${RESET_COLOR}"
+sudo apt install -y "$package" 2>/dev/null
 fi
 done
+echo -e "${Lan}依赖包已安装，跳过${RESET_COLOR}"
+echo -e "${Lan}安装完成...${RESET_COLOR}"
+
+echo -e "${Hong}正在检查已安装的软件包是否有更新...${RESET_COLOR}"
+if ! sudo apt list --upgradable -a 2>/dev/null | grep -q "Listing..."; then
+echo -e "${Hong}正在升级已安装的软件包...${RESET_COLOR}"
+sudo apt upgrade -y 2>/dev/null
+else
+echo -e "${Lan}已是最新，跳过${RESET_COLOR}"
+fi
 
 # 检查ffmpeg是否已经安装
 if command -v ffmpeg >/dev/null 2>&1; then
