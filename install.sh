@@ -93,15 +93,15 @@ IFS='.' read -r major minor patch <<< "$NODE_VERSION"
 major=$((10#$major))
 minor=$((10#$minor))
 patch=$((10#$patch))
-# 判断版本是否大于或等于20
-if [[ $major -lt 20 ]]; then
-echo -e "${Huang}Nodejs版本小于20，重新安装Nodejs20中...${RESET_COLOR}"
+# 判断版本是否大于或等于21
+if [[ $major -lt 21 ]]; then
+echo -e "${Huang}Nodejs版本小于21，重新安装Nodejs21中...${RESET_COLOR}"
 # 安装Nodejs
 sudo apt remove -y libnode-dev
-curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_21.x | sudo -E bash -
 sudo apt install -y nodejs
 else
-# 判断版本是否小于或者等于22
+# 判断版本是否小于或者等于22（目前最新）
 if [[ $major -lt 22 ]]; then
 echo -e "${Hong}Nodejs版本小于22，${Qing}当前版本号为：$NODE_VERSION"
 echo -e "您可以选择继续使用当前稳定版本不进行升级为22非稳定版本"
