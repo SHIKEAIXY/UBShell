@@ -139,26 +139,6 @@ else
 echo -e "${Lan}pnpm已安装，跳过安装步骤${RESET_COLOR}"
 fi
 
-# 获取Python版本
-current_python_version=$(python3 --version)
-
-# 检查Python版本是否为3.10
-if [[ "$current_python_version" != *"Python 3.10"* ]]; then
-echo -e "${Hong}当前Python版本错误，${Huang}正在重新安装Python 3.10...${RESET_COLOR}"
-sudo apt-get remove --purge python3
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt-get install -y python3.10
-# 检查是否安装成功
-if [[ "$(python3.10 --version)" == *"Python 3.10"* ]]; then
-echo -e "${Lu}Python 3.10安装成功${RESET_COLOR}"
-else
-echo -e "${Hong}Python 3.10安装失败${RESET_COLOR}"
-fi
-else
-echo -e "${Qing}当前Python版本：${current_python_version}，${Lan}跳过...${RESET_COLOR}"
-fi
-
 # 检查net-tools是否已安装
 if ! type netstat >/dev/null 2>&1; then
 echo -e "${Huang}net-tools未安装，正在安装net-tools中${RESET_COLOR}"
