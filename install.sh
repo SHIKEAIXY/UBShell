@@ -11,11 +11,6 @@ Qing='\033[0;36m'  # 青色
 # 恢复颜色
 RESET_COLOR='\033[0m'
 
-# 赋予权限
-mkdir /root/Shell
-chmod +x /root/Bot/Shell/install2.sh
-chmod +x /root/Bot/Shell
-
 echo -e "${Hong}通知："
 echo -e "蓝色为：正常输出，代表无需进行的处理"
 echo -e "黄色为：正常输出，代表正在进行的任务"
@@ -206,7 +201,17 @@ fi
 done
 echo -e "${Lan}依赖包已全部安装，跳过${RESET_COLOR}"
 echo -e "${Lu}安装完成...${RESET_COLOR}"
+# 判断redis是否启动
+if pgrep "redis-server" >/dev/null; then
+echo -e "${Lan}redis服务已启动，跳过${RESET_COLOR}"
+else
+echo -e "${Luang}正在启动redis数据库.${RESET_COLOR}"
+sudo systemctl start redis-server
+echo -e "${Lan}redis服务启动成功${RESET_COLOR}"
+fi
 
+# 等待全部完成
+sleep 1
 done
 
-sleep 1
+echo -e "${Zi}已全部完成...${RESET_COLOR}"
