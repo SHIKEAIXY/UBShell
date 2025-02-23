@@ -212,6 +212,5 @@ fi
 
 # 等待全部完成
 sleep 1
-done
 
 echo -e "${Zi}已全部完成...${RESET_COLOR}"
