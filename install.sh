@@ -11,6 +11,11 @@ Qing='\033[0;36m'  # 青色
 # 恢复颜色
 RESET_COLOR='\033[0m'
 
+# 赋予权限
+mkdir /root/Shell
+chmod +x /root/Bot/Shell/install2.sh
+chmod +x /root/Bot/Shell
+
 echo -e "${Hong}通知："
 echo -e "蓝色为：正常输出，代表无需进行的处理"
 echo -e "黄色为：正常输出，代表正在进行的任务"
@@ -24,7 +29,8 @@ architecture=$(uname -m)
 if [ "$architecture" == "x86_64" ]; then
 echo -e "${Qing}当前架构为AMD${RESET_COLOR}"
 else
-echo -e "${Qing}当前架构为ARM${RESET_COLOR}"
+echo -e "${Hong}⚠️⚠️⚠️：当前架构为ARM"
+echo -e "在ARM上可能无法正常部署成功?${RESET_COLOR}"
 fi
 
 # 获取发行版信息
@@ -78,7 +84,7 @@ else
 echo -e "${Lan}已是最新，跳过${RESET_COLOR}"
 fi
 
-# 检查Nodejs是否已经安装，东西有点多，单独写一处
+# 检查Nodejs是否已经安装，东西有点多，单独写一行
 if [ -z "$(command -v node)" ]; then
 echo -e "${Huang}nodejs未安装，开始安装...${RESET_COLOR}"
 # 安装Nodejs
@@ -93,18 +99,18 @@ IFS='.' read -r major minor patch <<< "$NODE_VERSION"
 major=$((10#$major))
 minor=$((10#$minor))
 patch=$((10#$patch))
-# 判断版本是否大于或等于21
-if [[ $major -lt 21 ]]; then
-echo -e "${Huang}Nodejs版本小于21，重新安装Nodejs21中...${RESET_COLOR}"
+# 判断版本是否大于或等于22
+if [[ $major -lt 22 ]]; then
+echo -e "${Huang}Nodejs版本小于22，重新安装Nodejs22中...${RESET_COLOR}"
 # 安装Nodejs
 sudo apt remove -y libnode-dev
-curl -sL https://deb.nodesource.com/setup_21.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
 else
-# 判断版本是否小于或者等于22（目前最新）
-if [[ $major -lt 22 ]]; then
-echo -e "${Hong}Nodejs版本小于22，${Qing}当前版本号为：$NODE_VERSION"
-echo -e "您可以选择继续使用当前稳定版本不进行升级为22非稳定版本"
+# 判断版本是否小于或者等于23
+if [[ $major -lt 23 ]]; then
+echo -e "${Hong}Nodejs版本小于23，${Qing}当前版本号为：$NODE_VERSION"
+echo -e "您可以选择继续使用当前稳定版本不进行升级为23非稳定版本"
 echo -e "请选择是否安装（yes/no）${RESET_COLOR}"
 while true; do
 read user_input
@@ -137,6 +143,16 @@ pnpm config set registry https://registry.npmmirror.com
 echo -e "${Lu}设置完毕${RESET_COLOR}"
 else
 echo -e "${Lan}pnpm已安装，跳过安装步骤${RESET_COLOR}"
+fi
+
+# 获取当前Python版本
+current_python_version=$(python3 --version)
+
+# 检查Python版本是否为3.10
+if [[ "$current_python_version" != *"Python 3.10"* ]]; then
+echo -e "${Hong}当前Python版本：${current_python_version}，版本建议Python 3.10${RESET_COLOR}"
+else
+echo -e "${Qing}当前Python版本：${current_python_version}，${Lan}跳过...${RESET_COLOR}"
 fi
 
 # 检查net-tools是否已安装
@@ -179,7 +195,7 @@ echo -e "${Lu}中文字体设置完毕${RESET_COLOR}"
 fi
 
 # 安装剩余所需包
-packages=(ffmpeg screen postgresql postgresql-contrib)
+packages=(lsof ffmpeg screen postgresql postgresql-contrib ca-certificates fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils libxkbcommon0)
 for package in "${packages[@]}"; do
 if dpkg -s "$package" >/dev/null 2>&1; then
 echo -e "${Lan}${package} 已安装，跳过${RESET_COLOR}"
@@ -191,16 +207,6 @@ done
 echo -e "${Lan}依赖包已全部安装，跳过${RESET_COLOR}"
 echo -e "${Lu}安装完成...${RESET_COLOR}"
 
-# 判断redis是否启动
-if pgrep "redis-server" >/dev/null; then
-echo -e "${Lan}redis服务已启动，跳过${RESET_COLOR}"
-else
-echo -e "${Luang}正在启动redis数据库.${RESET_COLOR}"
-sudo systemctl start redis-server
-echo -e "${Lan}redis服务启动成功${RESET_COLOR}"
-fi
+done
 
-# 等待全部完成
 sleep 1
-
-echo -e "${Zi}已全部完成...${RESET_COLOR}"
