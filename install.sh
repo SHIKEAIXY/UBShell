@@ -79,52 +79,63 @@ else
 echo -e "${Lan}已是最新，跳过${RESET_COLOR}"
 fi
 
-# 检查Nodejs是否已经安装，东西有点多，单独写一行
+# 检查Nodejs是否已经安装
 if [ -z "$(command -v node)" ]; then
-echo -e "${Huang}nodejs未安装，开始安装...${RESET_COLOR}"
-# 安装Nodejs
-sudo apt remove -y libnode-dev
-curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-else
-echo -e "${Lan}nodejs已安装，${Huang}检查版本...${RESET_COLOR}"
-# 获取Nodejs的版本信息
-NODE_VERSION=$(node -v | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
-IFS='.' read -r major minor patch <<< "$NODE_VERSION"
-major=$((10#$major))
-minor=$((10#$minor))
-patch=$((10#$patch))
-# 判断版本是否大于或等于22
-if [[ $major -lt 22 ]]; then
-echo -e "${Huang}Nodejs版本小于22，重新安装Nodejs22中...${RESET_COLOR}"
-# 安装Nodejs
-sudo apt remove -y libnode-dev
-curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs
-else
-# 判断版本是否小于或者等于23
-if [[ $major -lt 23 ]]; then
-echo -e "${Hong}Nodejs版本小于23，${Qing}当前版本号为：$NODE_VERSION"
-echo -e "您可以选择继续使用当前稳定版本不进行升级为23非稳定版本"
-echo -e "请选择是否安装（yes/no）${RESET_COLOR}"
+echo -e "${Huang}Nodejs未安装，是否安装最新版23（yes）或稳定版22（no）？${RESET_COLOR}"
 while true; do
 read user_input
 if [ "$user_input" == "yes" ] || [ "$user_input" == "y" ]; then
-echo -e "${Huang}正在安装中${RESET_COLOR}"
+echo -e "${Huang}正在安装Nodejs 23...${RESET_COLOR}"
 sudo apt remove -y libnode-dev
 curl -sL https://deb.nodesource.com/setup_23.x | sudo -E bash -
 sudo apt install -y nodejs
-echo -e "${Lu}安装完毕${RESET_COLOR}"
+echo -e "${Lu}Nodejs 23安装完毕${RESET_COLOR}"
 break
 elif [ "$user_input" == "no" ] || [ "$user_input" == "n" ]; then
+echo -e "${Huang}正在安装Nodejs 22...${RESET_COLOR}"
+sudo apt remove -y libnode-dev
+curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+echo -e "${Lu}Nodejs 22安装完毕${RESET_COLOR}"
 break
 else
 echo -e "${Hong}输入错误，请输入yes或no:${RESET_COLOR}"
 fi
 done
 else
-echo -e "${Qing}当前Nodejs版本：$NODE_VERSION，无需升级${RESET_COLOR}"
+echo -e "${Lan}Nodejs已安装，${Huang}检查版本...${RESET_COLOR}"
+# 获取Nodejs的版本信息
+NODE_VERSION=$(node -v | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
+IFS='.' read -r major minor patch <<< "$NODE_VERSION"
+major=$((10#$major))
+minor=$((10#$minor))
+patch=$((10#$patch))
+
+# 判断版本是否低于22
+if [[ $major -lt 22 ]]; then
+echo -e "${Huang}当前Nodejs版本为 $NODE_VERSION，低于22。是否安装最新版23（yes）或稳定版22（no）？${RESET_COLOR}"
+while true; do
+read user_input
+if [ "$user_input" == "yes" ] || [ "$user_input" == "y" ]; then
+echo -e "${Huang}正在安装Nodejs 23...${RESET_COLOR}"
+sudo apt remove -y libnode-dev
+curl -sL https://deb.nodesource.com/setup_23.x | sudo -E bash -
+sudo apt install -y nodejs
+echo -e "${Lu}Nodejs 23安装完毕${RESET_COLOR}"
+break
+elif [ "$user_input" == "no" ] || [ "$user_input" == "n" ]; then
+echo -e "${Huang}正在安装Nodejs 22...${RESET_COLOR}"
+sudo apt remove -y libnode-dev
+curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+echo -e "${Lu}Nodejs 22安装完毕${RESET_COLOR}"
+break
+else
+echo -e "${Hong}输入错误，请输入yes或no:${RESET_COLOR}"
 fi
+done
+else
+echo -e "${Qing}当前Nodejs版本为 $NODE_VERSION，无需升级${RESET_COLOR}"
 fi
 fi
 
