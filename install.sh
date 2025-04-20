@@ -1,4 +1,7 @@
 #!/bin/bash
+export PYTHONUNBUFFERED=1
+exec > >(tee -a install.log) 2>&1
+
 # 颜色变量
 Hong='\033[0;31m'  # 红色
 Lan='\033[0;34m'   # 蓝色
@@ -11,21 +14,38 @@ Qing='\033[0;36m'  # 青色
 # 恢复颜色
 RESET_COLOR='\033[0m'
 
-echo -e "${Hong}通知："
-echo -e "蓝色为：正常输出，代表无需进行的处理"
-echo -e "黄色为：正常输出，代表正在进行的任务"
-echo -e "绿色为：正常输出，代表完成的任务"
-echo -e "紫色为：正常输出，代表特殊的数据相关提示"
-echo -e "青色为：正常输出，代表系统/版本相关提示"
-echo -e "红色为：异常输出，代表处理失败/重要提示${RESET_COLOR}"
+# 检查是否为root用户并明确提示
+if [ "$(id -u)" -ne 0 ]; then
+echo -e "${Hong}当前用户: $(whoami)${RESET_COLOR}"
+echo -e "${Hong}需要sudo权限，正在提升权限...${RESET_COLOR}"
+if sudo -n true 2>/dev/null; then
+echo -e "${Lu}已有sudo权限${RESET_COLOR}"
+else
+echo -e "${Huang}正在请求密码...${RESET_COLOR}"
+ exec sudo su -c "bash $0 $@" || {
+echo -e "${Hong}提升权限失败${RESET_COLOR}"
+exit 1
+}
+fi
+else
+echo -e "${Qing}当前已是root用户${RESET_COLOR}"
+fi
 
 # 判断系统架构
 architecture=$(uname -m)
 if [ "$architecture" == "x86_64" ]; then
 echo -e "${Qing}当前架构为AMD${RESET_COLOR}"
 else
-echo -e "${Hong}⚠️⚠️⚠️：当前架构为ARM"
-echo -e "在ARM上可能无法正常部署成功?${RESET_COLOR}"
+echo -e "${Qing}当前架构为ARM${RESET_COLOR}"
+fi
+
+# 检查Git是否已经安装
+if command -v git >/dev/null 2>&1; then
+echo -e "${Lan}Git已安装，跳过安装步骤${RESET_COLOR}"
+else
+echo -e "${Huang}Git未安装，开始进行安装${RESET_COLOR}"
+sudo apt install -y git
+echo -e "${Lu}Git安装完成${RESET_COLOR}"
 fi
 
 # 获取发行版信息
@@ -42,7 +62,7 @@ elif [ "$distro" = "Debian" ] && [ $major_version -ge 10 ]; then
 echo -e "${Qing}当前Debian版本为：$version ${Huang}系统版本正确，继续安装√${RESET_COLOR}"
 else
 echo -e "${Hong}⚠️⚠️⚠️：当前系统版本过低，请升级系统后再试"
-echo -e "Ubuntu20+ && Debian 10+${RESET_COLOR}"
+echo -e "Ubuntu20.04 + && Debian 10+${RESET_COLOR}"
 exit 0
 fi
 else
@@ -60,7 +80,7 @@ else
 echo -e "${Lan}apt列表已是最新，跳过${RESET_COLOR}"
 fi
 echo -e "${Huang}正在安装部分依赖包...${RESET_COLOR}"
-packages=(apt-transport-https curl ca-certificates git)
+packages=(apt-transport-https curl ca-certificates)
 for package in "${packages[@]}"; do
 if dpkg -s "$package" >/dev/null 2>&1; then
 echo -e "${Lan}${package} 已安装，跳过${RESET_COLOR}"
@@ -79,61 +99,51 @@ else
 echo -e "${Lan}已是最新，跳过${RESET_COLOR}"
 fi
 
-# 检查Nodejs是否已经安装
+# Nodejs安装
 if [ -z "$(command -v node)" ]; then
 echo -e "${Huang}Nodejs未安装，是否安装最新版23（yes）或稳定版22（no）？${RESET_COLOR}"
-while true; do
-read user_input
+read -t 3 user_input || user_input="no"
 if [ "$user_input" == "yes" ] || [ "$user_input" == "y" ]; then
 echo -e "${Huang}正在安装Nodejs 23...${RESET_COLOR}"
 sudo apt remove -y libnode-dev
 curl -sL https://deb.nodesource.com/setup_23.x | sudo -E bash -
 sudo apt install -y nodejs
 echo -e "${Lu}Nodejs 23安装完毕${RESET_COLOR}"
-break
 elif [ "$user_input" == "no" ] || [ "$user_input" == "n" ]; then
 echo -e "${Huang}正在安装Nodejs 22...${RESET_COLOR}"
 sudo apt remove -y libnode-dev
 curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
 echo -e "${Lu}Nodejs 22安装完毕${RESET_COLOR}"
-break
 else
 echo -e "${Hong}输入错误，请输入yes或no:${RESET_COLOR}"
 fi
-done
 else
 echo -e "${Lan}Nodejs已安装，${Huang}检查版本...${RESET_COLOR}"
-# 获取Nodejs的版本信息
 NODE_VERSION=$(node -v | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
 IFS='.' read -r major minor patch <<< "$NODE_VERSION"
 major=$((10#$major))
 minor=$((10#$minor))
 patch=$((10#$patch))
 
-# 判断版本是否低于22
 if [[ $major -lt 22 ]]; then
 echo -e "${Huang}当前Nodejs版本为 $NODE_VERSION，低于22。是否安装最新版23（yes）或稳定版22（no）？${RESET_COLOR}"
-while true; do
-read user_input
+read -t 3 user_input || user_input="no"
 if [ "$user_input" == "yes" ] || [ "$user_input" == "y" ]; then
 echo -e "${Huang}正在安装Nodejs 23...${RESET_COLOR}"
 sudo apt remove -y libnode-dev
 curl -sL https://deb.nodesource.com/setup_23.x | sudo -E bash -
 sudo apt install -y nodejs
 echo -e "${Lu}Nodejs 23安装完毕${RESET_COLOR}"
-break
 elif [ "$user_input" == "no" ] || [ "$user_input" == "n" ]; then
 echo -e "${Huang}正在安装Nodejs 22...${RESET_COLOR}"
 sudo apt remove -y libnode-dev
 curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
 echo -e "${Lu}Nodejs 22安装完毕${RESET_COLOR}"
-break
 else
 echo -e "${Hong}输入错误，请输入yes或no:${RESET_COLOR}"
 fi
-done
 else
 echo -e "${Qing}当前Nodejs版本为 $NODE_VERSION，无需升级${RESET_COLOR}"
 fi
@@ -152,11 +162,42 @@ echo -e "${Lan}pnpm已安装，跳过安装步骤${RESET_COLOR}"
 fi
 
 # 获取当前Python版本
-current_python_version=$(python3 --version)
+current_python_version=$(python3 --version 2>&1)
 
-# 检查Python版本是否为3.10
-if [[ "$current_python_version" != *"Python 3.10"* ]]; then
-echo -e "${Hong}当前Python版本：${current_python_version}，版本建议Python 3.10${RESET_COLOR}"
+# 检查Python版本
+current_python_version=$(python3 --version 2>&1)
+if [[ "$current_python_version" == *"command not found"* ]]; then
+echo -e "${Hong}Python3未安装${RESET_COLOR}"
+exit 1
+elif [[ "$current_python_version" == *"permission denied"* ]]; then
+echo -e "${Hong}权限不足${RESET_COLOR}"
+exit 1
+elif [[ "$current_python_version" != *"Python 3.10"* ]]; then
+echo -e "${Hong}检测到Python版本: ${current_python_version}${RESET_COLOR}"
+echo -e "${Huang}是否安装Python 3.10? (y/n)${RESET_COLOR}"
+read -t 5 user_input || user_input="n"
+if [[ "$user_input" =~ ^[yY] ]]; then
+echo -e "${Huang}开始安装Python 3.10...${RESET_COLOR}"
+if ! sudo add-apt-repository -y ppa:deadsnakes/ppa; then
+echo -e "${Hong}PPA添加失败${RESET_COLOR}"
+exit 1
+fi
+sudo apt update
+if sudo apt install -y python3.10 python3.10-distutils python3.10-venv; then
+echo -e "${Lu}Python 3.10安装成功${RESET_COLOR}"
+echo -e "${Huang}是否要将Python 3.10设置为默认版本？ (y/n)${RESET_COLOR}"
+read -t 3 default_input || default_input="y"
+if [[ "$default_input" =~ ^[yY] ]]; then
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 2
+sudo update-alternatives --set python3 /usr/bin/python3.10
+echo -e "${Lu}已设为默认版本${RESET_COLOR}"
+fi
+else
+echo -e "${Hong}安装失败${RESET_COLOR}"
+fi
+else
+echo -e "${Lan}跳过安装${RESET_COLOR}"
+fi
 else
 echo -e "${Qing}当前Python版本：${current_python_version}，${Lan}跳过...${RESET_COLOR}"
 fi
@@ -212,16 +253,7 @@ fi
 done
 echo -e "${Lan}依赖包已全部安装，跳过${RESET_COLOR}"
 echo -e "${Lu}安装完成...${RESET_COLOR}"
-# 判断redis是否启动
-if pgrep "redis-server" >/dev/null; then
-echo -e "${Lan}redis服务已启动，跳过${RESET_COLOR}"
-else
-echo -e "${Luang}正在启动redis数据库.${RESET_COLOR}"
-sudo systemctl start redis-server
-echo -e "${Lan}redis服务启动成功${RESET_COLOR}"
-fi
 
 # 等待全部完成
+echo -e "${Hong}等待1秒继续...${RESET_COLOR}"
 sleep 1
-
-echo -e "${Zi}已全部完成...${RESET_COLOR}"
