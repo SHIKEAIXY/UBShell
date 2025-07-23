@@ -101,14 +101,14 @@ fi
 
 # Nodejs安装
 if [ -z "$(command -v node)" ]; then
-echo -e "${Huang}Nodejs未安装，是否安装最新版23（yes）或稳定版22（no）？${RESET_COLOR}"
+echo -e "${Huang}Nodejs未安装，是否安装最新版24（yes）或稳定版22（no）？${RESET_COLOR}"
 read -t 3 user_input || user_input="no"
 if [ "$user_input" == "yes" ] || [ "$user_input" == "y" ]; then
-echo -e "${Huang}正在安装Nodejs 23...${RESET_COLOR}"
+echo -e "${Huang}正在安装Nodejs 24...${RESET_COLOR}"
 sudo apt remove -y libnode-dev
-curl -sL https://deb.nodesource.com/setup_23.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs
-echo -e "${Lu}Nodejs 23安装完毕${RESET_COLOR}"
+echo -e "${Lu}Nodejs 24安装完毕${RESET_COLOR}"
 elif [ "$user_input" == "no" ] || [ "$user_input" == "n" ]; then
 echo -e "${Huang}正在安装Nodejs 22...${RESET_COLOR}"
 sudo apt remove -y libnode-dev
@@ -127,14 +127,14 @@ minor=$((10#$minor))
 patch=$((10#$patch))
 
 if [[ $major -lt 22 ]]; then
-echo -e "${Huang}当前Nodejs版本为 $NODE_VERSION，低于22。是否安装最新版23（yes）或稳定版22（no）？${RESET_COLOR}"
+echo -e "${Huang}当前Nodejs版本为 $NODE_VERSION，低于22。是否安装最新版24（yes）或稳定版22（no）？${RESET_COLOR}"
 read -t 3 user_input || user_input="no"
 if [ "$user_input" == "yes" ] || [ "$user_input" == "y" ]; then
-echo -e "${Huang}正在安装Nodejs 23...${RESET_COLOR}"
+echo -e "${Huang}正在安装Nodejs 24...${RESET_COLOR}"
 sudo apt remove -y libnode-dev
-curl -sL https://deb.nodesource.com/setup_23.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs
-echo -e "${Lu}Nodejs 23安装完毕${RESET_COLOR}"
+echo -e "${Lu}Nodejs 24安装完毕${RESET_COLOR}"
 elif [ "$user_input" == "no" ] || [ "$user_input" == "n" ]; then
 echo -e "${Huang}正在安装Nodejs 22...${RESET_COLOR}"
 sudo apt remove -y libnode-dev
